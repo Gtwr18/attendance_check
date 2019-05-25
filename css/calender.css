@@ -1,0 +1,58 @@
+div#calendar-wrap {
+    width: 100%;
+}
+
+div#calendar ul li {
+    display: block;
+    float: left;
+    width: 14.2857142857%;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #cccccc;
+    margin-bottom: -1px;
+    margin-right: -1px;
+}
+
+div#calendar ul {
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    clear: both;
+}
+
+div#calendar ul.weekdays {
+    height: 40px;
+    background: #333;
+}
+
+div#calendar ul.weekdays li {
+    font-size: 13px;
+    color: #FFFFFF;
+    text-align: center;
+    text-transform: uppercase;
+    line-height: 20px;
+    border: none;
+    padding: 10px 6px;
+}
+
+div#calendar ul.days li {
+    height: 180px;
+    cursor: pointer;
+}
+
+div#calendar ul.days li:hover {
+    background: #EEEEEE;
+}
+
+div#calendar ul.days li div.date {
+    text-align: center;
+    background: #333333;
+    color: white;
+    width: 25px;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 50%;
+    float: right;
+    height: 25px;
+    line-height: 25px;
+}
