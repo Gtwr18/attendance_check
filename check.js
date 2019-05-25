@@ -2,6 +2,14 @@ const http = require("http");
 const fs = require("fs");
 const url = require('url');
 const qs = require('querystring');
+const mysql = require('mysql');
+const date_format = require('date-format');
+var db = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'root',
+    password : '1q2w3e4r',
+    database : 'checkboard'
+  });
 const template = `
 <html>
 <head>
@@ -21,8 +29,8 @@ const template = `
         <p id="pt">
         <span>Physical Training</span>
         <br>
-        <input type="radio" name="PT" value="true">함
-        <input type="radio" name="PT" value="false">제낌<br>
+        <input type="radio" name="PT" value='TRUE'>함
+        <input type="radio" name="PT" value='FALSE'>제낌<br>
         </p>
         <input type="submit">
     </form>
@@ -43,23 +51,22 @@ var app = http.createServer(function(request,response){
             body += data;
         });//페이지에서 받아온 정보 받기
         request.on('end', function(){
-            var attendanceData = qs.parse(body);//데이터 짜르고
-            var name = attendanceData.name;//각각의 변수에 담기
-            var time = attendanceData.time;
-            var PT = attendanceData.PT;
-
-            /*var id = post.id;
-            var title = post.title;
-            var description = post.description;
-            fs.rename(`../syntax/data/${id}`, `../syntax/data/${title}`, function(err){
-                fs.writeFile(`../syntax/data/${title}`, description, 'utf8', function(err){
-                    response.writeHead(302, {Location: `/?id=${title}`});
-                    response.end();
-                })
-            });
-            response.writeHead(302, {Location: `/?id=${title}`});
-            response.end();*/
+            console.log(qs.parse(body).PT);
+            let time = new Date().toISOString().replace(/T/,' ').replace(/\..+/, '');//mysql datetime 형식으로 변환
+            db.connect();
+            db.query(`INSERT INTO userinfo (name, time, pt) VALUES ("${qs.parse(body).name}","${time}",${qs.parse(body).PT})`, 
+            function (error, results) {
+                if (error) {
+                    throw error;
+                };
+                response.writeHead(302,{Location : '/checked'});
+                response.end();
+              });
+            
+            db.end();
         });
+    }else if(request.url === "/checked"){
+        
     }
     
     });
