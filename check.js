@@ -56,35 +56,37 @@ var app = http.createServer(function(request,response){
             db.query(`INSERT INTO userinfo (name, hour, min, sec, year, mon, date, day, pt) VALUES ("${qs.parse(body).name}","${time.getHours()}",
             "${time.getMinutes()}","${time.getSeconds()}",
             "${time.getFullYear()}","${time.getMonth()}","${time.getDate()}",
-            "${time.getDay()}", ${qs.parse(body).PT})`, 
-            function (error, results) {
-                if (error) {
-                    throw error;
-                };
-                response.writeHead(302,{Location : '/checked'});
-                response.end();
-              });
+            "${time.getDay()}", ${qs.parse(body).PT})`);
+            response.writeHead(302,{Location : '/calender'});
+            response.end();
             
-            db.end();
         });
-    }else if(request.url === "/checked"){
+    }
+    // else if(request.url === "/checked"){
+    //     // let today = new Date();
+    //     // fs.readFile(`./calenderHtml/${today.getMonth()+1}.html`,function(err, data){
+    //     //     if(err){
+    //     //         let dateArr = calender.getDateArr(today);
+    //     //         let thisMonthCalender = calender.makeCalender(today.getFullYear(),today.getMonth()+1,dateArr);
+    //     //         fs.writeFileSync(`./calenderHtml/${today.getMonth()+1}.html`,thisMonthCalender);
+    //     //         response.writeHead(302,{Location : "/calender"});
+    //     //         response.end();
+    //     //     }else{
+    //     //         response.writeHead(302,{Location : "/calender"});
+    //     //         response.end();
+    //     //     }
+    //     // });
+    // }
+    else if(request.url === "/calender"){
         let today = new Date();
-        fs.readFile(`./calenderHtml/${today.getMonth()+1}.html`,function(err, data){
-            if(err){
-                let dateArr = calender.getDateArr(today);
-                let thisMonthCalender = calender.makeCalender(today.getFullYear(),today.getMonth()+1,dateArr);
-                fs.writeFileSync(`./calenderHtml/${today.getMonth()+1}.html`,thisMonthCalender);
-                response.writeHead(302,{Location : "/calender"});
-                response.end();
-            }else{
-                response.writeHead(302,{Location : "/calender"});
-                response.end();
-            }
+        db.query(`SELECT * FROM userinfo where year='${today.getFullYear()}' and mon = '${today.getMonth()}';`,function(err, data){
+            if(err) throw err;
+            console.log(data[1].name);//callback 이아닌 밖에서 리턴값 호출시 이상한 데이터가 담기는이유가뭘까
         });
-    }else if(request.url === "/calender"){
-        let today = new Date();
+        let dateArr = calender.getDateArr(today);
+        let thisMonthCalender = calender.makeCalender(today.getFullYear(),today.getMonth()+1,dateArr);
         response.writeHead(200);
-        response.end(fs.readFileSync(`./calenderHtml/${today.getMonth()+1}.html`));
+        response.end(thisMonthCalender);
     }else if(request.url ==="/css/calender.css"){
         response.writeHead(200);
         response.end(fs.readFileSync(__dirname + "/css/calender.css"));
