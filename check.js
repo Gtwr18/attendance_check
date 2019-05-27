@@ -5,6 +5,7 @@ const qs = require('querystring');
 const mysql = require('mysql');
 const date_format = require('date-format');
 const calender = require("./calender.js");
+//const popup = require('popups');
 var db = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
@@ -52,13 +53,28 @@ var app = http.createServer(function(request,response){
         });//페이지에서 받아온 정보 받기
         request.on('end', function(){
             let time = new Date();//mysql datetime 형식으로 변환
-            db.connect();
-            db.query(`INSERT INTO userinfo (name, hour, min, sec, year, mon, date, day, pt) VALUES ("${qs.parse(body).name}","${time.getHours()}",
-            "${time.getMinutes()}","${time.getSeconds()}",
-            "${time.getFullYear()}","${time.getMonth()}","${time.getDate()}",
-            "${time.getDay()}", ${qs.parse(body).PT})`);
-            response.writeHead(302,{Location : '/calender'});
-            response.end();
+            db.query(`select * from userinfo where name ='${qs.parse(body).name}' and year = '${time.getFullYear()}' and 
+            mon = '${time.getMonth()}' and date = '${time.getDate()}'`,function (err,data){
+                if(err){throw err;}
+                else{
+                    if(data.length>0){
+                        response.writeHead(302,{Location : '/calender'});
+                        response.end();
+                    }else{
+                        db.query(`INSERT INTO userinfo (name, hour, min, sec, year, mon, date, day, pt) VALUES ("${qs.parse(body).name}","${time.getHours()}",
+                        "${time.getMinutes()}","${time.getSeconds()}",
+                        "${time.getFullYear()}","${time.getMonth()}","${time.getDate()}",
+                        "${time.getDay()}", ${qs.parse(body).PT})`);
+                        response.writeHead(302,{Location : '/calender'});
+                        response.end();
+                    }
+                }
+                
+            })
+                //popup.alert({content : 'already checked! use calender button at hompage.'});
+                
+            
+                
             
         });
     }
@@ -81,12 +97,12 @@ var app = http.createServer(function(request,response){
         let today = new Date();
         db.query(`SELECT * FROM userinfo where year='${today.getFullYear()}' and mon = '${today.getMonth()}';`,function(err, data){
             if(err) throw err;
-            console.log(data[1].name);//callback 이아닌 밖에서 리턴값 호출시 이상한 데이터가 담기는이유가뭘까
+            //console.log(data);//callback 이아닌 밖에서 리턴값 호출시 이상한 데이터가 담기는이유가뭘까
+            let dateArr = calender.getDateArr(today,data);
+            let thisMonthCalender = calender.makeCalender(today.getFullYear(),today.getMonth()+1,dateArr);
+            response.writeHead(200);
+            response.end(thisMonthCalender);
         });
-        let dateArr = calender.getDateArr(today);
-        let thisMonthCalender = calender.makeCalender(today.getFullYear(),today.getMonth()+1,dateArr);
-        response.writeHead(200);
-        response.end(thisMonthCalender);
     }else if(request.url ==="/css/calender.css"){
         response.writeHead(200);
         response.end(fs.readFileSync(__dirname + "/css/calender.css"));
